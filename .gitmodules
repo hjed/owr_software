@@ -1,0 +1,3 @@
+[submodule "gui/src/ros_ovr_sdk"]
+	path = gui/src/ros_ovr_sdk
+	url = https://github.com/OSUrobotics/ros_ovr_sdk.git
