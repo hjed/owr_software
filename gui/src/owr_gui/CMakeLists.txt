@@ -108,21 +108,21 @@ include_directories(
 
 add_executable(navigation src/NavigationGUI.cpp src/NavigationNode.cpp src/GLUTWindow.cpp src/Video_Feed_Frame.cpp)
 add_dependencies(navigation ${catkin_EXPORTED_TARGETS})
-add_dependencies(navigation bluesat_owr_protobuf_generate_messages_cpp)
-add_dependencies(navigation bluesat_owr_protobuf)
+#add_dependencies(navigation bluesat_owr_protobuf_generate_messages_cpp)
+#add_dependencies(navigation bluesat_owr_protobuf)
 add_dependencies(navigation owr_messages_gencpp)
 target_link_libraries(navigation ${catkin_LIBRARIES} GL GLU glut)
 
 add_executable(finecontrol src/FineControlGUI.cpp src/FineControlNode.cpp src/GLUTWindow.cpp src/Button.cpp src/Video_Feed_Frame.cpp) 
 add_dependencies(finecontrol ${catkin_EXPORTED_TARGETS})
-add_dependencies(finecontrol bluesat_owr_protobuf_generate_messages_cpp)
-add_dependencies(finecontrol bluesat_owr_protobuf)
+#add_dependencies(finecontrol bluesat_owr_protobuf_generate_messages_cpp)
+#add_dependencies(finecontrol bluesat_owr_protobuf)
 target_link_libraries(finecontrol ${catkin_LIBRARIES} GL GLU glut)
 
 add_executable(auto src/AutoGUI.cpp src/AutoNode.cpp src/GLUTWindow.cpp src/GPSInputManager.cpp) 
 add_dependencies(auto ${catkin_EXPORTED_TARGETS})
-add_dependencies(auto bluesat_owr_protobuf_generate_messages_cpp)
-add_dependencies(auto bluesat_owr_protobuf)
+#add_dependencies(auto bluesat_owr_protobuf_generate_messages_cpp)
+#add_dependencies(auto bluesat_owr_protobuf)
 target_link_libraries(auto ${catkin_LIBRARIES} GL GLU glut)
 
 ## Declare a cpp library
