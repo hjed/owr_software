@@ -1,6 +1,0 @@
-
-
- 
-     float32 voltage 
- 
-

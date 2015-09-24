@@ -1,6 +1,0 @@
-package bluesat_owr_protobuf_proto;
-
-message signal {
-    required float signalValue = 1;
-}
-
