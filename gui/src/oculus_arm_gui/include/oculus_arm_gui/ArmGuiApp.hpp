@@ -14,7 +14,8 @@
 #include <ros/ros.h>
 //#include <OVR_Kernel.h>
 
- 
+
+#define ROS_SPINNER_THREADS 2
 //using namespace OVR;
 //using namespace OVR::OvrPlatform;
 //using namespace OVR::Render;
@@ -24,12 +25,16 @@ class ArmGuiApp {
     
     public:
         //Constructor and Deconstructor
-        ArmGuiApp();
+        ArmGuiApp(int argc, char ** argv;
         ~ArmGuiApp();
+    
+    //main loop
+    void run();
 
     
     protected:
-    
+        ros::NodeHandle nh;
+        
     private:
         ovrHmd hmd;
     

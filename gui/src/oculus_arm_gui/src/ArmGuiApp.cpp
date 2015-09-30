@@ -9,14 +9,13 @@
  */
  
 #include "oculus_arm_gui/ArmGuiApp.hpp" 
+#include <../../opt/ros/indigo/include/ros/init.h>
 
 
 int main(int argc, char ** argv) {
-    ros::init(argc, argv, "arm_gui");
-    /*ROS_INFO("object avoidance starting");
-    ObjectAvoidance ObjectAvoidance;
-    ROS_INFO("initialising...run");
-    ObjectAvoidance.run();*/
+    ArmGuiApp * armGui = new ArmGuiApp(argc, argv);
+    armGui->run();
+    delete armGui;
 }
 
 
@@ -24,7 +23,9 @@ int main(int argc, char ** argv) {
  * Constructor for ArmGuiApp
  * Initialises ROS, and the OVR SDK
  */
-ArmGuiApp::ArmGuiApp() {
+ArmGuiApp::ArmGuiApp(int argc, char ** argv) {
+    //initialise ros
+    ros::init(argc, argv, "arm_gui");
     //initialise the api
     ovr_Initialize();
     //Create the HMD object
@@ -35,6 +36,11 @@ ArmGuiApp::ArmGuiApp() {
         ROS_ERROR("Failed to Create HMD\n Creating a fake one");
         hmd = ovrHmd_CreateDebug(ovrHmdType(ovrHmd_DK2));
     }
+    
+    //enable head tracking
+    //second parameter is capabilities we want, third is those we must have
+    ovrHmd_ConfigureTracking(hmd, ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position, 0);
+    
 
 }
 
@@ -45,5 +51,20 @@ ArmGuiApp::ArmGuiApp() {
 ArmGuiApp::~ArmGuiApp() {
     ovrHmd_Destroy(hmd);
     ovr_Shutdown();
-
+    ROS_INFO("shutdown complete");
 }
+
+/**
+ * Main Logic Loop
+ */
+void ArmGuiApp::run() {
+    //start getting callbacks
+    ros::AsyncSpinner spinner(ROS_SPINNER_THREADS);
+    spinner.start();
+    while(ros::ok()) {
+        
+    }
+    
+}
+
+
