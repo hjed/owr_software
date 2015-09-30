@@ -8,27 +8,32 @@
  *  main logic loop.
  */
  
- #ifndef ARM_GUI_APP_H
- #define ARM_GUI_APP_H
- #include <OVR_CAPI.h>
+#ifndef ARM_GUI_APP_H
+#define ARM_GUI_APP_H
+#include <OVR_CAPI.h>
+#include <ros/ros.h>
+//#include <OVR_Kernel.h>
+
  
-using namespace OVR;
-using namespace OVR::OvrPlatform;
-using namespace OVR::Render;
-using namespace ROS;
+//using namespace OVR;
+//using namespace OVR::OvrPlatform;
+//using namespace OVR::Render;
+//using namespace ros;
  
-class ArmGuiApp : public Application {
+class ArmGuiApp {
     
     public:
         //Constructor and Deconstructor
         ArmGuiApp();
         ~ArmGuiApp();
+
     
     protected:
     
     private:
+        ovrHmd hmd;
     
  
-}
+};
  
  #endif //ARM_GUI_APP_H
