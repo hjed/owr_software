@@ -12,6 +12,15 @@
 #define ARM_GUI_APP_H
 #include <OVR_CAPI.h>
 #include <ros/ros.h>
+
+//QT Dependencies
+
+#include <QWidget>  
+
+//rviz dependencies
+#include "rviz/visualization_manager.h"
+#include "rviz/render_panel.h"
+#include "rviz/display.h"
 //#include <OVR_Kernel.h>
 
  
@@ -20,18 +29,24 @@
 //using namespace OVR::Render;
 //using namespace ros;
  
-class ArmGuiApp {
-    
+class ArmGuiApp : public QWidget {
+    Q_OBJECT //required for rviz
     public:
         //Constructor and Deconstructor
-        ArmGuiApp();
+        ArmGuiApp(QWidget* parent = 0);
         ~ArmGuiApp();
 
     
-    protected:
+    
+    //private Q_SLOTS:
+      //void setThickness( int thickness_percent );
+      //void setCellSize( int cell_size_percent );
     
     private:
         ovrHmd hmd;
+        rviz::VisualizationManager* manager;
+        rviz::RenderPanel* renderPanel;
+        rviz::Display* grid;
     
  
 };
