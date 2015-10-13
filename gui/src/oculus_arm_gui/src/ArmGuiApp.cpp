@@ -13,8 +13,12 @@
 
 
 int main(int argc, char ** argv) {
-    ArmGuiApp * armGui = new ArmGuiApp(argc, argv);
-    armGui->run();
+    ros::init(argc, argv, "arm_gui");
+    QApplication app(argc, argv);
+    ArmGuiApp * armGui = new ArmGuiApp();
+    armGui->show();
+    app.exec();
+
     delete armGui;
 }
 
@@ -23,9 +27,7 @@ int main(int argc, char ** argv) {
  * Constructor for ArmGuiApp
  * Initialises ROS, and the OVR SDK
  */
-ArmGuiApp::ArmGuiApp(int argc, char ** argv) {
-    //initialise ros
-    ros::init(argc, argv, "arm_gui");
+ArmGuiApp::ArmGuiApp(QWidget* parent)  : QWidget( parent ){
     //initialise the api
     ovr_Initialize();
     //Create the HMD object
@@ -41,6 +43,28 @@ ArmGuiApp::ArmGuiApp(int argc, char ** argv) {
     //second parameter is capabilities we want, third is those we must have
     ovrHmd_ConfigureTracking(hmd, ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position, 0);
     
+    // Construct and lay out render panel.
+    renderPanel = new rviz::RenderPanel();
+    QVBoxLayout* mainLayout = new QVBoxLayout();
+    mainLayout->addWidget( renderPanel);
+    
+    setLayout(mainLayout);
+    
+    //this is the main rviz class
+    //this code attaches it to the renderPanel we just setup
+    manager = new rviz::VisualizationManager( renderPanel);
+    renderPanel->initialize( manager->getSceneManager(), manager);
+    manager->initialize();
+    manager->startUpdate();
+
+    // Create an rviz Grid display.
+    grid = manager->createDisplay( "rviz/Grid", "adjustable grid", true );
+    ROS_ASSERT( grid != NULL );
+
+    // Configure the GridDisplay the way we like it.
+    grid->subProp( "Line Style" )->setValue( "Billboards" );
+    grid->subProp( "Color" )->setValue( Qt::yellow );
+
 
 }
 
@@ -51,6 +75,7 @@ ArmGuiApp::ArmGuiApp(int argc, char ** argv) {
 ArmGuiApp::~ArmGuiApp() {
     ovrHmd_Destroy(hmd);
     ovr_Shutdown();
+    delete manager;
     ROS_INFO("shutdown complete");
 }
 

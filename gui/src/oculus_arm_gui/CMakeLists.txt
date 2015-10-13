@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   ros_ovr_sdk
+  rviz
 )
 
 if(NOT ros_ovr_sdk_FOUND)
@@ -94,6 +95,11 @@ catkin_package(
   DEPENDS ros_ovr_sdk # Dependency for Oculus SDK
 )
 
+#needed for rviz
+find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+include(${QT_USE_FILE})
+add_definitions(-DQT_NO_KEYWORDS)
+
 ###########
 ## Build ##
 ###########
@@ -106,11 +112,15 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${ros_ovr_sdk_INCLUDE_DIRS}
 )
+link_directories(${catkin_LIBRARY_DIRS})
 
-add_executable(arm_gui src/ArmGuiApp.cpp)
+#qt preprocessor for header files
+qt4_wrap_cpp(MOC_FILES  include/oculus_arm_gui/ArmGuiApp.hpp)
+
+add_executable(arm_gui src/ArmGuiApp.cpp ${MOC_FILES}) 
 add_dependencies(arm_gui ${catkin_EXPORTED_TARGETS})
 add_dependencies(arm_gui owr_messages_gencpp)
-target_link_libraries(arm_gui ${catkin_LIBRARIES} ${ros_ovr_sdk_LIBRARIES} GL)
+target_link_libraries(arm_gui ${catkin_LIBRARIES} ${ros_ovr_sdk_LIBRARIES} ${QT_LIBRARIES} default_plugin)
 
 
 ## Declare a cpp library
