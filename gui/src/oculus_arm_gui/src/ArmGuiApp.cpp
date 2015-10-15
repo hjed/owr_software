@@ -10,7 +10,8 @@
  
 #include "oculus_arm_gui/ArmGuiApp.hpp" 
 #include <../../opt/ros/indigo/include/ros/init.h>
-
+#include <QApplication>
+#include <QVBoxLayout>
 
 int main(int argc, char ** argv) {
     ros::init(argc, argv, "arm_gui");

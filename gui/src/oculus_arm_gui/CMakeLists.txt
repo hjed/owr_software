@@ -115,9 +115,9 @@ include_directories(
 link_directories(${catkin_LIBRARY_DIRS})
 
 #qt preprocessor for header files
-qt4_wrap_cpp(MOC_FILES  include/oculus_arm_gui/ArmGuiApp.hpp)
+qt4_wrap_cpp(MOC_FILES  include/oculus_arm_gui/ArmGuiApp.hpp include/oculus_arm_gui/OculusDisplay.hpp)
 
-add_executable(arm_gui src/ArmGuiApp.cpp ${MOC_FILES}) 
+add_executable(arm_gui src/ArmGuiApp.cpp src/OculusDisplay.cpp ${MOC_FILES}) 
 add_dependencies(arm_gui ${catkin_EXPORTED_TARGETS})
 add_dependencies(arm_gui owr_messages_gencpp)
 target_link_libraries(arm_gui ${catkin_LIBRARIES} ${ros_ovr_sdk_LIBRARIES} ${QT_LIBRARIES} default_plugin)

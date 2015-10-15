@@ -34,7 +34,7 @@ class ArmGuiApp : public QWidget {
     Q_OBJECT //required for rviz
     public:
         //Constructor and Deconstructor
-        ArmGuiApp();
+        ArmGuiApp(QWidget* parent  = 0);
         ~ArmGuiApp();
     
     //main loop
