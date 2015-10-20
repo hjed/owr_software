@@ -14,6 +14,30 @@
 
 #include <QApplication>
 #include <OGRE/OgreRenderWindow.h>
+
+
+#include <OGRE/OgreRoot.h>
+#include <OGRE/OgreSceneNode.h>
+#include <OGRE/OgreRenderWindow.h>
+
+#include <ros/package.h>
+
+#include <rviz/properties/bool_property.h>
+#include <rviz/properties/status_property.h>
+#include <rviz/properties/float_property.h>
+#include <rviz/properties/string_property.h>
+#include <rviz/properties/tf_frame_property.h>
+#include <rviz/properties/vector_property.h>
+
+#include <rviz/window_manager_interface.h>
+#include <rviz/view_manager.h>
+#include <rviz/render_panel.h>
+#include <rviz/display_context.h>
+#include <rviz/ogre_helpers/render_widget.h>
+#include <rviz/ogre_helpers/render_system.h>
+#include <rviz/frame_manager.h>
+
+
  
 OculusDisplay::OculusDisplay(rviz::RenderPanel *renderPanel, QWidget* parent):  sceneNode(0) {
     renderWidget=renderPanel;
@@ -22,7 +46,8 @@ OculusDisplay::OculusDisplay(rviz::RenderPanel *renderPanel, QWidget* parent):  
     Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(ROS_PACKAGE_NAME);*/
 
     //this detects when the number of screen changes (i.e when an occulus is connected)
-    connect( QApplication::desktop(), SIGNAL( screenCountChanged ( int ) ), this, SLOT( onScreenCountChanged(int)) );
+    //connect( QApplication::desktop(), SIGNAL( screenCountChanged ( int ) ), this, SLOT( onScreenCountChanged(int)) );
+    //HACK: dosen't work
 }
 
 void OculusDisplay::onInitialize() {
@@ -36,7 +61,7 @@ void OculusDisplay::onInitialize() {
     //attach ourselves to the ORGE system so we can get the low level stuff
     window->addListener(this);
     
-    sceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
+    sceneNode = scene_manager_->getRootSceneNode()->createChildSceneNode();
 }
 
 
@@ -44,23 +69,26 @@ void OculusDisplay::onInitialize() {
 void OculusDisplay::onScreenCountChanged( int newCount)  {
   if ( newCount == 1 ) {
     fullscreenProperty->setBool(false);
-    fullscreen_property->setHidden(true);
+    fullscreenProperty->setHidden(true);
     setStatus( rviz::StatusProperty::Error, "Screen", "No secondary screen detected. Cannot render to Oculus device.");
   }  else  {
-    fullscreen_property_->setHidden(false);
+    fullscreenProperty->setHidden(false);
     setStatus( rviz::StatusProperty::Ok, "Screen", "Using screen #2.");
   }
 }
 
 
-void update( float wall_dt, float ros_dt ) {};
-void reset() {};
+void OculusDisplay::update( float wall_dt, float ros_dt ) {};
+void OculusDisplay::reset() {};
 
-void preRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {};
-void postRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {};
+void OculusDisplay::preRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {};
+void OculusDisplay::postRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {};
 
-void onEnable() {};
-void onDisable() {};
+void OculusDisplay::onEnable() {};
+void OculusDisplay::onDisable() {};
 
-void updateCamera() {};
+void OculusDisplay::updateCamera() {};
 
+OculusDisplay::~OculusDisplay() {
+    delete renderWidget;
+}

@@ -14,6 +14,9 @@
 
 //Qt dependencies
 #include <QObject>
+#include <QWidget>
+
+#include <boost/bind.hpp>
 
 //OGRE (framework rviz is based on) dependencies
 #include <OGRE/OgreRenderTargetListener.h>
