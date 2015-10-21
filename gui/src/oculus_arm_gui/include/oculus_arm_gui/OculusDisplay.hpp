@@ -20,13 +20,30 @@
 
 //OGRE (framework rviz is based on) dependencies
 #include <OGRE/OgreRenderTargetListener.h>
+#include <OGRE/OgreQuaternion.h>
+#include <OGRE/OgreVector3.h>
+#include <OGRE/OgreSceneManager.h>
+// #include <OGRE/Scene>
+#include <OGRE/OgreRenderWindow.h>
+#include <OGRE/OgreCamera.h>
+#include <OGRE/OgreViewport.h>
+#include <OGRE/OgreCompositorInstance.h>
+#include <OGRE/OgreCompositor.h>
 
 //rviz depenencies
 #include "rviz/display.h"
 #include "rviz/render_panel.h"
 
+//oculus dependancies
+#include "OVR_CAPI_0_5_0.h"
+#include "OVR_CAPI_Keys.h"
+
 //our depenecies
 #include "oculus_arm_gui/ArmGuiApp.hpp" 
+
+
+#define CAMERA_TF "/base_link"
+#define NUM_EYES 2
 
 //This class extends rviz::Display to overide rviz functionality, and renderTargetListener
 //to get the information it needs
@@ -65,9 +82,30 @@ class OculusDisplay : public rviz::Display, public Ogre::RenderTargetListener {
 
         rviz::RenderPanel *renderWidget;
         Ogre::SceneNode *sceneNode;
+        Ogre::SceneNode * cameraNode;
+//         Ogre::SceneManager *sceneManager;
         
         rviz::BoolProperty *fullscreenProperty;
-
+        
+        //Oculus device 
+        ovrHmd hmd;
+        
+        
+        //stores if the oculus is ready
+        bool oculusReady;
+        //stores the oculus's orientation
+        Ogre::Quaternion orientation;
+        //centre offset of the projection
+        float centreOffset;
+        //the two cameras we use
+        Ogre::Camera *oculusCameras[NUM_EYES];
+        Ogre::Viewport *viewport[NUM_EYES];
+        Ogre::CompositorInstance *compositors[NUM_EYES];
+        
+        //the render description
+        ovrEyeType eyeType;
+        ovrEyeRenderDesc eyeRenderDesc[NUM_EYES];
+        
 
 
 };

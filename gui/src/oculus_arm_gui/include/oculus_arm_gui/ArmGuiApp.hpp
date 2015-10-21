@@ -21,10 +21,13 @@
 #include "rviz/visualization_manager.h"
 #include "rviz/render_panel.h"
 #include "rviz/display.h"
+#include "oculus_arm_gui/OculusDisplay.hpp"
 //#include <OVR_Kernel.h>
 
  
 #define ROS_SPINNER_THREADS 2
+
+class OculusDisplay;
 //using namespace OVR;
 //using namespace OVR::OvrPlatform;
 //using namespace OVR::Render;
@@ -52,7 +55,8 @@ class ArmGuiApp : public QWidget {
         ovrHmd hmd;
         rviz::VisualizationManager* manager;
         rviz::RenderPanel* renderPanel;
-        rviz::Display* grid;
+        //rviz::Display* grid;
+        OculusDisplay * display;
     
  
 };

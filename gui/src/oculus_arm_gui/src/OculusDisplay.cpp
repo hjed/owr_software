@@ -38,9 +38,26 @@
 #include <rviz/frame_manager.h>
 
 
+const float g_defaultNearClip = 0.01f;
+const float g_defaultFarClip = 10000.0f;
+const float g_defaultIPD = 0.064f;
+const Ogre::ColourValue g_defaultViewportColour(97 / 255.0f, 97 / 255.0f, 200 / 255.0f);
+#define DEFAULT_PROJECTION_CENTRE_OFFSET  0.14529906f
+const float g_defaultDistortion[4] = {1.0f, 0.22f, 0.24f, 0.0f};
+const float g_defaultChromAb[4] = {0.996, -0.004, 1.014, 0.0f};
  
-OculusDisplay::OculusDisplay(rviz::RenderPanel *renderPanel, QWidget* parent):  sceneNode(0) {
+OculusDisplay::OculusDisplay(rviz::RenderPanel *renderPanel, QWidget* parent):  
+    sceneNode(0), oculusReady(false),
+    centreOffset(DEFAULT_PROJECTION_CENTRE_OFFSET) {
     renderWidget=renderPanel;
+    
+    //initalise the cameras
+    for(int i =0; i < NUM_EYES; i++) {
+        oculusCameras[i] = NULL;
+        viewport[i] = NULL;
+        compositors[i] = NULL;
+    }
+    
     /*std::string rviz_path = ros::package::getPath(ROS_PACKAGE_NAME);
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation( rviz_path + "/ogre_media", "FileSystem", ROS_PACKAGE_NAME );
     Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(ROS_PACKAGE_NAME);*/
@@ -78,17 +95,127 @@ void OculusDisplay::onScreenCountChanged( int newCount)  {
 }
 
 
-void OculusDisplay::update( float wall_dt, float ros_dt ) {};
-void OculusDisplay::reset() {};
+void OculusDisplay::update( float wall_dt, float ros_dt ) {
+    updateCamera();
+    renderWidget->getRenderWindow()->update(false);
+    
+    //TODO: check mag calibration
+}
+void OculusDisplay::reset() {
+    rviz::Display::reset();
+    //TODO: oculus stuff
+}
 
-void OculusDisplay::preRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {};
-void OculusDisplay::postRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {};
+void OculusDisplay::preRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {
+    //TODO: oculus checks
+    updateCamera();
+}
+void OculusDisplay::postRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {
+    //TODOL oculus checks
+    renderWidget->getRenderWindow()->swapBuffers();
+}
 
-void OculusDisplay::onEnable() {};
-void OculusDisplay::onDisable() {};
+void OculusDisplay::onEnable() {
+    
+    //setup the oculus if its not ready
+    if(!oculusReady || !hmd) {
+        //intialise the ovr
+        ovrInitParams params = {0,0,NULL,0};
+        ovr_Initialize(&params);
+        //create the hmd, on the 0th oculus
+        hmd = ovrHmd_Create(0);
+        
+        //If we can't connect, create a fake one
+        if(!hmd) {
+            ROS_ERROR("Failed to Create HMD\n Creating a fake one");
+            hmd = ovrHmd_CreateDebug(ovrHmdType(ovrHmd_DK2));
+            if(!hmd) {
+                ROS_ERROR("Failed to create a fake one");
+                abort();
+            }
+        }
+        
+        ovrHmd_RecenterPose(hmd);
+        
+        //enable tracking
+        ovrHmd_ConfigureTracking(hmd, ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position, 0);
+        
+        //configure rendering
+        if(ovrHmd_ConfigureRendering(hmd, 0, 0, 0, eyeRenderDesc)) {
+            ROS_ERROR("Failed to configure rendering");
+            //abort();
+        }
+        
+        oculusReady = true;
+        
+        
+        
+    }
+    
+    //setup the cameras
+    cameraNode = sceneNode->createChildSceneNode("StereoCameraNode");\
+    oculusCameras[0] = scene_manager_->createCamera("left");
+    oculusCameras[1] = scene_manager_->createCamera("right");
+    
+    
+    Ogre::MaterialPtr matLeft = Ogre::MaterialManager::getSingleton().getByName("Ogre/Compositor/Oculus");
+    Ogre::MaterialPtr matRight = matLeft->clone("Ogre/Compositor/Oculus/Right");
+    Ogre::GpuProgramParametersSharedPtr pParamsLeft =
+        matLeft->getTechnique(0)->getPass(0)->getFragmentProgramParameters();
+    Ogre::GpuProgramParametersSharedPtr pParamsRight =
+        matRight->getTechnique(0)->getPass(0)->getFragmentProgramParameters();
+    Ogre::Vector4 hmdwarp;
+    
+    for(int i = 0; i < NUM_EYES; ++i) {
+        
+        
+    }
+    
+    renderWidget->getRenderWindow();
+    //TODO: oculus stuff
+}
+void OculusDisplay::onDisable() {
+    clearStatuses();
+    renderWidget->setVisible(true);
+    //TODO: oculus stuff
+}
 
-void OculusDisplay::updateCamera() {};
+//Core rendering function
+void OculusDisplay::updateCamera() {
+    //TODO: check oculus stuff
+    
+    //stores the camera position
+    Ogre::Vector3 pos;
+    Ogre::Quaternion ori;
+    
+    //have the camera follow a transform frame
+    context_->getFrameManager()->getTransform(CAMERA_TF, ros::Time(), pos, ori);
+    Ogre::Quaternion r;
+    r.FromAngleAxis( Ogre::Radian(M_PI*0.5), Ogre::Vector3::UNIT_X );
+    ori = ori * r;
+    r.FromAngleAxis( Ogre::Radian(-M_PI*0.5), Ogre::Vector3::UNIT_Y );
+    ori = ori * r;
+    
+    sceneNode->setPosition(pos);
+    sceneNode->setOrientation(ori);
+    
+    //TODO: oculus stuff
+    /*
+     * oculus_->updateProjectionMatrices();
+     * oculus_->update();
+     */
+    
+}
 
 OculusDisplay::~OculusDisplay() {
     delete renderWidget;
+    
+    //if the oculus exists, shut it down
+    if(hmd) {
+        ovrHmd_Destroy(hmd);
+        ovr_Shutdown();
+        oculusReady = false;
+    }
+    
+    //TODO: shutdown orge
 }
