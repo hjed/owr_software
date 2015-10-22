@@ -43,10 +43,12 @@ ArmGuiApp::ArmGuiApp(QWidget* parent)  : QWidget( parent ){
     
     // Construct and lay out render panel.
     renderPanel = new rviz::RenderPanel();
-    QVBoxLayout* mainLayout = new QVBoxLayout();
-    mainLayout->addWidget( renderPanel);
+    //QVBoxLayout* mainLayout = new QVBoxLayout();
+    //mainLayout->addWidget( renderPanel);
     
-    setLayout(mainLayout);
+    //setLayout(mainLayout);
+    renderPanel->setParent(  parent);
+    renderPanel->setWindowFlags( Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint );
     
     //this is the main rviz class
     //this code attaches it to the renderPanel we just setup

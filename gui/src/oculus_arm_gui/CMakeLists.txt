@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   ros_ovr_sdk
   rviz
+  oculus_rviz_plugins
 )
 
 if(NOT ros_ovr_sdk_FOUND)
@@ -90,7 +91,7 @@ endif(NOT ros_ovr_sdk_FOUND)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES oculus_arm_gui
-  CATKIN_DEPENDS owr_messages roscpp sensor_msgs std_msgs
+  CATKIN_DEPENDS owr_messages roscpp sensor_msgs std_msgs oculus_rviz_plugins
   DEPENDS system_lib
   DEPENDS ros_ovr_sdk # Dependency for Oculus SDK
 )

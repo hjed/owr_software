@@ -19,6 +19,7 @@
 #include <OGRE/OgreRoot.h>
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreRenderWindow.h>
+#include <OGRE/OgreCompositorManager.h>
 
 #include <ros/package.h>
 
@@ -38,8 +39,9 @@
 #include <rviz/frame_manager.h>
 
 
-const float g_defaultNearClip = 0.01f;
-const float g_defaultFarClip = 10000.0f;
+#define DEFAULT_NEAR_CLIP 0.01f
+#define DEFAULT_FAR_CLIP 10000.0f
+#define DK2_ASPECT_RATIO 960.0/1080.0
 const float g_defaultIPD = 0.064f;
 const Ogre::ColourValue g_defaultViewportColour(97 / 255.0f, 97 / 255.0f, 200 / 255.0f);
 #define DEFAULT_PROJECTION_CENTRE_OFFSET  0.14529906f
@@ -157,22 +159,24 @@ void OculusDisplay::onEnable() {
     oculusCameras[0] = scene_manager_->createCamera("left");
     oculusCameras[1] = scene_manager_->createCamera("right");
     
-    
-    Ogre::MaterialPtr matLeft = Ogre::MaterialManager::getSingleton().getByName("Ogre/Compositor/Oculus");
-    Ogre::MaterialPtr matRight = matLeft->clone("Ogre/Compositor/Oculus/Right");
-    Ogre::GpuProgramParametersSharedPtr pParamsLeft =
-        matLeft->getTechnique(0)->getPass(0)->getFragmentProgramParameters();
-    Ogre::GpuProgramParametersSharedPtr pParamsRight =
-        matRight->getTechnique(0)->getPass(0)->getFragmentProgramParameters();
-    Ogre::Vector4 hmdwarp;
-    
+    //attach the eye cameras in the right place
     for(int i = 0; i < NUM_EYES; ++i) {
+        cameraNode->attachObject(oculusCameras[i]);
+        //setup camera focus, etc
+        oculusCameras[i]->setFarClipDistance(DEFAULT_NEAR_CLIP);
+        oculusCameras[i]->setNearClipDistance(DEFAULT_NEAR_CLIP);
+        oculusCameras[i]->setPosition((i * 2 - 1) * OVR_DEFAULT_IPD * 0.5f, 0, 0);
+        oculusCameras[i]->setFOVy(Ogre::Radian(hmd->CameraFrustumVFovInRadians*2.));
+        oculusCameras[i]->setAspectRatio(DK2_ASPECT_RATIO); 
         
-        
+        renderWidget->getRenderWindow()->removeViewport(i);
+        viewport[i] = renderWidget->getRenderWindow()->addViewport(oculusCameras[i],i, 0.5f * i, 0, 0.5f, 1.0f);
+        //compositors[i] = Ogre::CompositorManager::getSingleton().addCompositor(viewport[i],
+        //                                                                     i == 0 ? "OculusLeft" : "OculusRight");
+        //compositors[i]->setEnabled(true);
     }
     
-    renderWidget->getRenderWindow();
-    //TODO: oculus stuff
+
 }
 void OculusDisplay::onDisable() {
     clearStatuses();
