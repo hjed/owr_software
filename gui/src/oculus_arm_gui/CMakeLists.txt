@@ -21,7 +21,7 @@ endif(NOT ros_ovr_sdk_FOUND)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+add_definitions(-DOCULUS_OGRE_COMPOS="${CATKIN_DEVEL_PREFIX}/ogre_media/")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed

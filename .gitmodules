@@ -1,3 +1,6 @@
 [submodule "gui/src/ros_ovr_sdk"]
 	path = gui/src/ros_ovr_sdk
 	url = https://github.com/OSUrobotics/ros_ovr_sdk.git
+[submodule "gui/src/oculus_rviz_plugins"]
+	path = gui/src/oculus_rviz_plugins
+	url = https://github.com/OSUrobotics/oculus_rviz_plugins.git

@@ -38,7 +38,6 @@
 #include <rviz/ogre_helpers/render_system.h>
 #include <rviz/frame_manager.h>
 
-
 #define DEFAULT_NEAR_CLIP 0.01f
 #define DEFAULT_FAR_CLIP 10000.0f
 #define DK2_ASPECT_RATIO 960.0/1080.0
@@ -153,6 +152,19 @@ void OculusDisplay::onEnable() {
         
         
     }
+    //load the oculus compositors from the oculus_rviz_plugins package
+   /* Ogre::ResourceGroupManager::getSingleton().addResourceLocation();
+    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+    Ogre::ResourceGroupManager::getSingleton().loadResourceGroup();*/
+    rviz::RenderSystem::get()->root()->addResourceLocation(OCULUS_OGRE_COMPOS, "FileSystem");
+    //this loads the compistor script that splits the camearas into two perscpetvies
+    Ogre::MaterialPtr matLeft = Ogre::MaterialManager::getSingleton().getByName("Ogre/Compositor/Oculus");
+    Ogre::MaterialPtr matRight = matLeft->clone("Ogre/Compositor/Oculus/Right");
+    Ogre::GpuProgramParametersSharedPtr pParamsLeft =
+        matLeft->getTechnique(0)->getPass(0)->getFragmentProgramParameters();
+    Ogre::GpuProgramParametersSharedPtr pParamsRight =
+        matRight->getTechnique(0)->getPass(0)->getFragmentProgramParameters();
+    
     
     //setup the cameras
     cameraNode = sceneNode->createChildSceneNode("StereoCameraNode");\
@@ -171,9 +183,9 @@ void OculusDisplay::onEnable() {
         
         renderWidget->getRenderWindow()->removeViewport(i);
         viewport[i] = renderWidget->getRenderWindow()->addViewport(oculusCameras[i],i, 0.5f * i, 0, 0.5f, 1.0f);
-        //compositors[i] = Ogre::CompositorManager::getSingleton().addCompositor(viewport[i],
-        //                                                                     i == 0 ? "OculusLeft" : "OculusRight");
-        //compositors[i]->setEnabled(true);
+        compositors[i] = Ogre::CompositorManager::getSingleton().addCompositor(viewport[i],
+                                                                             i == 0 ? "OculusLeft" : "OculusRight");
+        compositors[i]->setEnabled(true);
     }
     
 
