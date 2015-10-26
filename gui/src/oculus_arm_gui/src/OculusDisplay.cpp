@@ -14,8 +14,6 @@
 
 #include <QApplication>
 #include <OGRE/OgreRenderWindow.h>
-
-
 #include <OGRE/OgreRoot.h>
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreRenderWindow.h>
@@ -29,6 +27,8 @@
 #include <rviz/properties/string_property.h>
 #include <rviz/properties/tf_frame_property.h>
 #include <rviz/properties/vector_property.h>
+
+#include <QDesktopWidget>
 
 #include <rviz/window_manager_interface.h>
 #include <rviz/view_manager.h>
@@ -75,6 +75,10 @@ void OculusDisplay::onInitialize() {
     Ogre::RenderWindow *window = renderWidget->getRenderWindow();
     window->setVisible(false);
     window->setAutoUpdated(false);
+    
+    fullscreenProperty = new rviz::BoolProperty( "Render to Oculus", false,
+        "If checked, will render fullscreen on your secondary screen. Otherwise, shows a window.",
+        this, SLOT(onFullScreenChanged()));
     
     //attach ourselves to the ORGE system so we can get the low level stuff
     window->addListener(this);
@@ -198,8 +202,46 @@ void OculusDisplay::onEnable() {
         compositors[i]->setEnabled(true);
     }
     
+    updateProjection();
+    
+    renderWidget->setVisible(true);
+    //check if the oculus is connected
+    onScreenCountChanged( QApplication::desktop()->numScreens() );
 
 }
+
+//handles the camera updating
+void OculusDisplay::updateProjection() {
+    //starts the frame update
+    ovrHmd_BeginFrameTiming(hmd, 0);
+    
+    //update the projection for each eye
+    for(int i = 0; i < NUM_EYES; i++) {
+        Ogre::Matrix4 proj = Ogre::Matrix4::IDENTITY;
+        oculusCameras[i]->setCustomProjectionMatrix(false);
+        
+        ovrEyeType eye;
+        //TODO: #define this
+        if(i == 0) {
+            eye = ovrEye_Left;
+        } else {
+            eye = ovrEye_Right;
+        }
+        
+        ovrEyeRenderDesc renderDesc = ovrHmd_GetRenderDesc(hmd, eye, hmd->DefaultEyeFov[i]);
+        
+        //do hte projection
+        proj.setTrans(Ogre::Vector3(renderDesc.HmdToEyeViewOffset.x, renderDesc.HmdToEyeViewOffset.y, renderDesc.HmdToEyeViewOffset.z));
+        
+        oculusCameras[i]->setCustomProjectionMatrix(true, proj * oculusCameras[i]->getProjectionMatrix());
+        
+    }
+    
+    //ends the frame update
+    ovrHmd_EndFrameTiming(hmd);
+}
+
+
 void OculusDisplay::onDisable() {
     clearStatuses();
     renderWidget->setVisible(true);

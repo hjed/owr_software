@@ -57,6 +57,8 @@ class OculusDisplay : public rviz::Display, public Ogre::RenderTargetListener {
         virtual void onInitialize();
         virtual void update( float wall_dt, float ros_dt );
         virtual void reset();
+        
+        void updateProjection();
 
         // Overrides from Ogre::RenderTargetListener
         virtual void preRenderTargetUpdate( const Ogre::RenderTargetEvent& evt );
