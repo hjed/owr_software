@@ -156,7 +156,17 @@ void OculusDisplay::onEnable() {
    /* Ogre::ResourceGroupManager::getSingleton().addResourceLocation();
     Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
     Ogre::ResourceGroupManager::getSingleton().loadResourceGroup();*/
-    rviz::RenderSystem::get()->root()->addResourceLocation(OCULUS_OGRE_COMPOS, "FileSystem");
+    Ogre::ResourceGroupManager::getSingletonPtr()->createResourceGroup("OculusResources");
+    Ogre::ResourceGroupManager::getSingleton().addResourceLocation(OCULUS_OGRE_COMPOS, "FileSystem", "OculusResources", true);
+    Ogre::ResourceGroupManager::getSingletonPtr()->initialiseResourceGroup("OculusResources");
+    Ogre::ResourceGroupManager::getSingletonPtr()->loadResourceGroup("OculusResources");
+    //rviz::RenderSystem::get()->root()->addResourceLocation(OCULUS_OGRE_COMPOS, "FileSystem");
+    if(Ogre::ResourceGroupManager::getSingleton().resourceLocationExists(OCULUS_OGRE_COMPOS)) {
+        ROS_ERROR("location dosen't exist");
+    }
+    if(!Ogre::MaterialManager::getSingleton().resourceExists("Ogre/Compositor/Oculus")) {
+        ROS_ERROR("can't load compositor");
+    }
     //this loads the compistor script that splits the camearas into two perscpetvies
     Ogre::MaterialPtr matLeft = Ogre::MaterialManager::getSingleton().getByName("Ogre/Compositor/Oculus");
     Ogre::MaterialPtr matRight = matLeft->clone("Ogre/Compositor/Oculus/Right");
