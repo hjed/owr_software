@@ -102,7 +102,9 @@ void OculusDisplay::onScreenCountChanged( int newCount)  {
 
 void OculusDisplay::update( float wall_dt, float ros_dt ) {
     updateCamera();
-    renderWidget->getRenderWindow()->update(false);
+    if(renderWidget->getRenderWindow()) {
+        renderWidget->getRenderWindow()->update(false);
+    }
     
     //TODO: check mag calibration
 }
@@ -244,7 +246,7 @@ void OculusDisplay::updateProjection() {
 
 void OculusDisplay::onDisable() {
     clearStatuses();
-    renderWidget->setVisible(true);
+    renderWidget->setVisible(false);
     //TODO: oculus stuff
 }
 
