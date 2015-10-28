@@ -49,8 +49,8 @@ const float g_defaultChromAb[4] = {0.996, -0.004, 1.014, 0.0f};
  
 OculusDisplay::OculusDisplay(rviz::RenderPanel *renderPanel,rviz::VisualizationManager* manager, QWidget* parent):  
     sceneNode(0), oculusReady(false),
-    centreOffset(DEFAULT_PROJECTION_CENTRE_OFFSET){
-    renderWidget = renderPanel;
+    centreOffset(DEFAULT_PROJECTION_CENTRE_OFFSET) {
+    //renderWidget = renderPanel;
     this->manager = manager;
     
     //initalise the cameras
@@ -72,11 +72,12 @@ OculusDisplay::OculusDisplay(rviz::RenderPanel *renderPanel,rviz::VisualizationM
 void OculusDisplay::onInitialize() {
     //create our render widget
     //renderWidget = new rviz::RenderWidget(rviz::RenderSystem::get());
+	renderWidget = new rviz::RenderPanel();
     renderWidget->setWindowTitle("Oculus Arm GUI");
     //setup the window so that it works correctly with oculus
     renderWidget->setWindowFlags( Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint );
     Ogre::RenderWindow *window = renderWidget->getRenderWindow();
-    window->setVisible(false);
+    window->setVisible(true);
     window->setHidden(false);
     window->setAutoUpdated(false);
     
@@ -125,7 +126,7 @@ void OculusDisplay::postRenderTargetUpdate( const Ogre::RenderTargetEvent& evt )
 }
 
 void OculusDisplay::onEnable() {
-    
+    ROS_INFO("On Enable");
     //setup the oculus if its not ready
     if(!oculusReady || !hmd) {
         //intialise the ovr
@@ -150,7 +151,7 @@ void OculusDisplay::onEnable() {
         ovrHmd_ConfigureTracking(hmd, ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position, 0);
         
         //configure rendering
-        if(ovrHmd_ConfigureRendering(hmd, 0, 0, 0, eyeRenderDesc)) {
+        if(!ovrHmd_ConfigureRendering(hmd, 0, 0, 0, eyeRenderDesc)) {
             ROS_ERROR("Failed to configure rendering");
             //abort();
         }
@@ -187,7 +188,7 @@ void OculusDisplay::onEnable() {
     
     
     //setup the cameras
-    cameraNode = sceneNode->createChildSceneNode("StereoCameraNode");\
+    cameraNode = sceneNode->createChildSceneNode("StereoCameraNode");
     oculusCameras[0] = manager->getSceneManager()->createCamera("left");
     oculusCameras[1] = manager->getSceneManager()->createCamera("right");
     
@@ -206,6 +207,7 @@ void OculusDisplay::onEnable() {
         compositors[i] = Ogre::CompositorManager::getSingleton().addCompositor(viewport[i],
                                                                              i == 0 ? "OculusLeft" : "OculusRight");
         compositors[i]->setEnabled(true);
+        ROS_INFO("Updating Eye %d", i);
     }
     
     updateProjection();
