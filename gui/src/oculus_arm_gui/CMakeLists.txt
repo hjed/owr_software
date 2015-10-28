@@ -123,6 +123,9 @@ add_dependencies(arm_gui ${catkin_EXPORTED_TARGETS})
 add_dependencies(arm_gui owr_messages_gencpp)
 target_link_libraries(arm_gui ${catkin_LIBRARIES} ${ros_ovr_sdk_LIBRARIES} ${QT_LIBRARIES} default_plugin)
 
+add_executable(arm_tf  src/JointManager.cpp src/RunJoints.cpp) 
+add_dependencies(arm_tf ${catkin_EXPORTED_TARGETS})
+target_link_libraries(arm_tf ${catkin_LIBRARIES} default_plugin)
 
 ## Declare a cpp library
 # add_library(oculus_arm_gui

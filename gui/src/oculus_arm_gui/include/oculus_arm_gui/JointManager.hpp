@@ -13,17 +13,22 @@
 #include <sensor_msgs/JointState.h>
 #include <string.h>
 #include <OGRE/OgreVector3.h>
+#include <tf/transform_listener.h>
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Quaternion.h>
 
 //used to store the joint position
 typedef struct _jointPosition {
     //the urdf joint name
     std::string jointName;
     //the position of the joint relative to base link
-    Ogre::Vector3 pos;
+    geometry_msgs::Vector3 pos;
     //the rotation of the joint relative to its origin
-    Ogre::Vector3 rot;
+    geometry_msgs::Vector3 rot;
     
-} *JointPositon;
+} jointPosition;
+
+typedef jointPosition* JointPosition;
 
 class JointManager {
     
@@ -31,17 +36,21 @@ class JointManager {
         JointManager(ros::NodeHandle nh);
         ~JointManager();
         
-        JointPositon getJoint(std::string jointName);
-        bool putJoint(JointPositon joint);
+        JointPosition getJoint(std::string jointName);
+        bool putJoint(JointPosition joint);
     
         void jointCallback(const sensor_msgs::JointState::ConstPtr& msg);
+
+        void logicLoop();
     protected:
         ros::Subscriber jointSub;
         ros::Publisher jointPub;
     private:
         //stores the position of all the joints
-        std::map <std::string, JointPositon> jointMap;
-        
+        std::map <std::string, JointPosition> jointMap;
+        //listens for the oculus transform
+        tf::TransformListener  listenToOculus;
+
 
 };
 
