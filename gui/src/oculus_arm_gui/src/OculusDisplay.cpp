@@ -47,9 +47,11 @@ const Ogre::ColourValue g_defaultViewportColour(97 / 255.0f, 97 / 255.0f, 200 / 
 const float g_defaultDistortion[4] = {1.0f, 0.22f, 0.24f, 0.0f};
 const float g_defaultChromAb[4] = {0.996, -0.004, 1.014, 0.0f};
  
-OculusDisplay::OculusDisplay( QWidget* parent):  
+OculusDisplay::OculusDisplay(rviz::RenderPanel *renderPanel,rviz::VisualizationManager* manager, QWidget* parent):  
     sceneNode(0), oculusReady(false),
-    centreOffset(DEFAULT_PROJECTION_CENTRE_OFFSET), renderWidget(0) {
+    centreOffset(DEFAULT_PROJECTION_CENTRE_OFFSET){
+    renderWidget = renderPanel;
+    this->manager = manager;
     
     //initalise the cameras
     for(int i =0; i < NUM_EYES; i++) {
@@ -69,12 +71,13 @@ OculusDisplay::OculusDisplay( QWidget* parent):
 
 void OculusDisplay::onInitialize() {
     //create our render widget
-    renderWidget = new rviz::RenderWidget(rviz::RenderSystem::get());
+    //renderWidget = new rviz::RenderWidget(rviz::RenderSystem::get());
     renderWidget->setWindowTitle("Oculus Arm GUI");
     //setup the window so that it works correctly with oculus
     renderWidget->setWindowFlags( Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint );
     Ogre::RenderWindow *window = renderWidget->getRenderWindow();
     window->setVisible(false);
+    window->setHidden(false);
     window->setAutoUpdated(false);
     
     fullscreenProperty = new rviz::BoolProperty( "Render to Oculus", true,
@@ -84,20 +87,22 @@ void OculusDisplay::onInitialize() {
     //attach ourselves to the ORGE system so we can get the low level stuff
     window->addListener(this);
     
-    sceneNode = scene_manager_->getRootSceneNode()->createChildSceneNode();
+    sceneNode = manager->getSceneManager()->getRootSceneNode()->createChildSceneNode();
 }
 
 
 //called by QT when the number of screens changed
 void OculusDisplay::onScreenCountChanged( int newCount)  {
-  if ( newCount == 1 ) {
+  /*if ( newCount == 1 ) {
     fullscreenProperty->setBool(false);
     fullscreenProperty->setHidden(true);
     setStatus( rviz::StatusProperty::Error, "Screen", "No secondary screen detected. Cannot render to Oculus device.");
   }  else  {
     fullscreenProperty->setHidden(false);
     setStatus( rviz::StatusProperty::Ok, "Screen", "Using screen #2.");
-  }
+  }*/
+  fullscreenProperty->setHidden(false);
+  fullscreenProperty->setBool(true);
 }
 
 
@@ -124,8 +129,8 @@ void OculusDisplay::onEnable() {
     //setup the oculus if its not ready
     if(!oculusReady || !hmd) {
         //intialise the ovr
-        ovrInitParams params = {0,0,NULL,0};
-        ovr_Initialize(&params);
+       // ovrInitParams params = {0,0,NULL,0};
+        ovr_Initialize();
         //create the hmd, on the 0th oculus
         hmd = ovrHmd_Create(0);
         
@@ -154,6 +159,8 @@ void OculusDisplay::onEnable() {
         
         
         
+    } else {
+        ROS_ERROR("oculus not ready");
     }
     //load the oculus compositors from the oculus_rviz_plugins package
    /* Ogre::ResourceGroupManager::getSingleton().addResourceLocation();
@@ -181,8 +188,8 @@ void OculusDisplay::onEnable() {
     
     //setup the cameras
     cameraNode = sceneNode->createChildSceneNode("StereoCameraNode");\
-    oculusCameras[0] = scene_manager_->createCamera("left");
-    oculusCameras[1] = scene_manager_->createCamera("right");
+    oculusCameras[0] = manager->getSceneManager()->createCamera("left");
+    oculusCameras[1] = manager->getSceneManager()->createCamera("right");
     
     //attach the eye cameras in the right place
     for(int i = 0; i < NUM_EYES; ++i) {

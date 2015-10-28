@@ -37,11 +37,11 @@ ArmGuiApp::ArmGuiApp(QWidget* parent)  : QWidget( parent ) {
     // Construct and lay out render panel.
     renderPanel = new rviz::RenderPanel();
     QVBoxLayout* mainLayout = new QVBoxLayout();
-    mainLayout->addWidget( renderPanel);
+    mainLayout->addWidget(renderPanel);
     
     setLayout(mainLayout);
-    renderPanel->setParent(  parent);
-    renderPanel->setWindowFlags( Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint );
+    //renderPanel->setParent(  parent);
+    //renderPanel->setWindowFlags( Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint );
     
     //this is the main rviz class
     //this code attaches it to the renderPanel we just setup
@@ -53,15 +53,17 @@ ArmGuiApp::ArmGuiApp(QWidget* parent)  : QWidget( parent ) {
     // Create an rviz Grid display.
     grid = manager->createDisplay( "rviz/Grid", "adjustable grid", true );
     
-    //ROS_ASSERT( grid != NULL );
+    ROS_ASSERT( grid != NULL );
 
     // Configure the GridDisplay the way we like it.
     grid->subProp( "Line Style" )->setValue( "Billboards" );
     grid->subProp( "Color" )->setValue( Qt::yellow );
     
-    display = new OculusDisplay(this);
+    display = new OculusDisplay(renderPanel,manager, this);
     manager->addDisplay(display, true);
 
+    
+    
 
 }
 
@@ -84,7 +86,7 @@ void ArmGuiApp::run() {
     ros::AsyncSpinner spinner(ROS_SPINNER_THREADS);
     spinner.start();
     while(ros::ok()) {
-        
+        //ros::spinonce();
     }
     
 }
