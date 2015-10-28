@@ -47,10 +47,9 @@ const Ogre::ColourValue g_defaultViewportColour(97 / 255.0f, 97 / 255.0f, 200 / 
 const float g_defaultDistortion[4] = {1.0f, 0.22f, 0.24f, 0.0f};
 const float g_defaultChromAb[4] = {0.996, -0.004, 1.014, 0.0f};
  
-OculusDisplay::OculusDisplay(rviz::RenderPanel *renderPanel, QWidget* parent):  
+OculusDisplay::OculusDisplay( QWidget* parent):  
     sceneNode(0), oculusReady(false),
-    centreOffset(DEFAULT_PROJECTION_CENTRE_OFFSET) {
-    renderWidget=renderPanel;
+    centreOffset(DEFAULT_PROJECTION_CENTRE_OFFSET), renderWidget(0) {
     
     //initalise the cameras
     for(int i =0; i < NUM_EYES; i++) {
@@ -69,7 +68,9 @@ OculusDisplay::OculusDisplay(rviz::RenderPanel *renderPanel, QWidget* parent):
 }
 
 void OculusDisplay::onInitialize() {
-    
+    //create our render widget
+    renderWidget = new rviz::RenderWidget(rviz::RenderSystem::get());
+    renderWidget->setWindowTitle("Oculus Arm GUI");
     //setup the window so that it works correctly with oculus
     renderWidget->setWindowFlags( Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint );
     Ogre::RenderWindow *window = renderWidget->getRenderWindow();

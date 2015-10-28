@@ -50,7 +50,7 @@
 class OculusDisplay : public rviz::Display, public Ogre::RenderTargetListener {
     Q_OBJECT
     public:
-        OculusDisplay(rviz::RenderPanel *renderPanel,QWidget* parent = 0);
+        OculusDisplay(QWidget* parent = 0);
         virtual ~OculusDisplay();
 
         // Overrides from Display
@@ -82,8 +82,8 @@ class OculusDisplay : public rviz::Display, public Ogre::RenderTargetListener {
         void onScreenCountChanged( int newCount );
 
     private:
-
-        rviz::RenderPanel *renderWidget;
+        rviz::RenderWidget * renderWidget;
+//         rviz::RenderPanel *renderWidget;
         Ogre::SceneNode *sceneNode;
         Ogre::SceneNode * cameraNode;
 //         Ogre::SceneManager *sceneManager;

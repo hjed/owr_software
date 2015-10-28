@@ -39,7 +39,7 @@ ArmGuiApp::ArmGuiApp(QWidget* parent)  : QWidget( parent ) {
     QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->addWidget( renderPanel);
     
-    //setLayout(mainLayout);
+    setLayout(mainLayout);
     renderPanel->setParent(  parent);
     renderPanel->setWindowFlags( Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint );
     
@@ -59,7 +59,7 @@ ArmGuiApp::ArmGuiApp(QWidget* parent)  : QWidget( parent ) {
     grid->subProp( "Line Style" )->setValue( "Billboards" );
     grid->subProp( "Color" )->setValue( Qt::yellow );
     
-    display = new OculusDisplay(renderPanel,this);
+    display = new OculusDisplay(this);
     manager->addDisplay(display, true);
 
 
