@@ -8,8 +8,9 @@
  */
 #ifndef JOINT_MANAGER_H
 #define JOINT_MANAGER_H
-
+#define ROS_SPINNER_THREADS 2
 #include <ros/ros.h>
+#include <sensor_msgs/JointState.h>
 #include <string.h>
 #include <OGRE/OgreVector3.h>
 
@@ -32,12 +33,17 @@ class JointManager {
         
         JointPositon getJoint(std::string jointName);
         bool putJoint(JointPositon joint);
-        
+    
+        void jointCallback(const sensor_msgs::JointState::ConstPtr& msg);
+    protected:
+        ros::Subscriber jointSub;
+        ros::Publisher jointPub;
     private:
         //stores the position of all the joints
         std::map <std::string, JointPositon> jointMap;
-    
-}
+        
+
+};
 
 
 #endif
