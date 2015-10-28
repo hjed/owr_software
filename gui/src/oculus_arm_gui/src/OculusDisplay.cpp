@@ -76,7 +76,7 @@ void OculusDisplay::onInitialize() {
     window->setVisible(false);
     window->setAutoUpdated(false);
     
-    fullscreenProperty = new rviz::BoolProperty( "Render to Oculus", false,
+    fullscreenProperty = new rviz::BoolProperty( "Render to Oculus", true,
         "If checked, will render fullscreen on your secondary screen. Otherwise, shows a window.",
         this, SLOT(onFullScreenChanged()));
     
@@ -105,8 +105,6 @@ void OculusDisplay::update( float wall_dt, float ros_dt ) {
     if(renderWidget->getRenderWindow()) {
         renderWidget->getRenderWindow()->update(false);
     }
-    
-    //TODO: check mag calibration
 }
 void OculusDisplay::reset() {
     rviz::Display::reset();
@@ -114,11 +112,9 @@ void OculusDisplay::reset() {
 }
 
 void OculusDisplay::preRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {
-    //TODO: oculus checks
     updateCamera();
 }
 void OculusDisplay::postRenderTargetUpdate( const Ogre::RenderTargetEvent& evt ) {
-    //TODOL oculus checks
     renderWidget->getRenderWindow()->swapBuffers();
 }
 
@@ -269,13 +265,25 @@ void OculusDisplay::updateCamera() {
     sceneNode->setPosition(pos);
     sceneNode->setOrientation(ori);
     
-    //TODO: oculus stuff
-    /*
-     * oculus_->updateProjectionMatrices();
-     * oculus_->update();
-     */
+    updateProjection();
+    
+    //setup the current 
+    Ogre::Quaternion orient = calcOrientation();
+    ovrEyeType eye; 
+    ovrPosef currentPose = ovrHmd_GetHmdPosePerEye(hmd, eye);
+    cameraNode->setPosition(currentPose.Position.x, currentPose.Position.y, currentPose.Position.z); //
+    cameraNode->setOrientation(calcOrientation());
     
 }
+
+
+Ogre::Quaternion OculusDisplay::calcOrientation() {
+    ovrTrackingState state = ovrHmd_GetTrackingState(hmd, 0.0);
+    //this find the post of the head
+    ovrQuatf q = state.HeadPose.ThePose.Orientation;
+    return Ogre::Quaternion(q.w, q.x, q.y, q.z);
+}
+
 
 OculusDisplay::~OculusDisplay() {
     delete renderWidget;

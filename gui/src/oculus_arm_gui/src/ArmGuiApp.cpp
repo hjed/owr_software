@@ -29,22 +29,15 @@ int main(int argc, char ** argv) {
  * Constructor for ArmGuiApp
  * Initialises ROS, and the OVR SDK
  */
-ArmGuiApp::ArmGuiApp(QWidget* parent)  : QWidget( parent ){
-    //initialise the api
-    //ovr_Initialize();
-    //Create the HMD object
-    //hmd = ovrHmd_Create(0);
-    
-    
-    
+ArmGuiApp::ArmGuiApp(QWidget* parent)  : QWidget( parent ) {  
     //enable head tracking
     //second parameter is capabilities we want, third is those we must have
     //ovrHmd_ConfigureTracking(hmd, ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position, 0);
     
     // Construct and lay out render panel.
     renderPanel = new rviz::RenderPanel();
-    //QVBoxLayout* mainLayout = new QVBoxLayout();
-    //mainLayout->addWidget( renderPanel);
+    QVBoxLayout* mainLayout = new QVBoxLayout();
+    mainLayout->addWidget( renderPanel);
     
     //setLayout(mainLayout);
     renderPanel->setParent(  parent);
@@ -58,13 +51,13 @@ ArmGuiApp::ArmGuiApp(QWidget* parent)  : QWidget( parent ){
     manager->startUpdate();
 
     // Create an rviz Grid display.
-    //grid = manager->createDisplay( "rviz/Grid", "adjustable grid", true );
+    grid = manager->createDisplay( "rviz/Grid", "adjustable grid", true );
     
     //ROS_ASSERT( grid != NULL );
 
     // Configure the GridDisplay the way we like it.
-    //grid->subProp( "Line Style" )->setValue( "Billboards" );
-    //grid->subProp( "Color" )->setValue( Qt::yellow );
+    grid->subProp( "Line Style" )->setValue( "Billboards" );
+    grid->subProp( "Color" )->setValue( Qt::yellow );
     
     display = new OculusDisplay(renderPanel,this);
     manager->addDisplay(display, true);

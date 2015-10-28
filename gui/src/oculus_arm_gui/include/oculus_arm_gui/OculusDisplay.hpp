@@ -70,6 +70,7 @@ class OculusDisplay : public rviz::Display, public Ogre::RenderTargetListener {
         virtual void onDisable();
 
         void updateCamera();
+        Ogre::Quaternion calcOrientation();
 
     protected Q_SLOTS:
 

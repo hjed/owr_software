@@ -55,7 +55,7 @@ class ArmGuiApp : public QWidget {
         ovrHmd hmd;
         rviz::VisualizationManager* manager;
         rviz::RenderPanel* renderPanel;
-        //rviz::Display* grid;
+        rviz::Display* grid;
         OculusDisplay * display;
     
  
