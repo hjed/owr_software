@@ -57,8 +57,10 @@ void JointManager::logicLoop() {
 	tf::Vector3 lastOrig;
 	while(ros::ok()) {
 		tf::StampedTransform transform;
+		tf::StampedTransform cameraArmSTransform;
 
 		try {
+			//we want to rotate around camera_link and then match that
 			listenToOculus.lookupTransform("/base_link", "/oculus",  ros::Time(0), transform);
 			tf::Vector3 orig =  transform.getOrigin();
 			tf::Quaternion rotQ =  transform.getRotation();
@@ -68,8 +70,17 @@ void JointManager::logicLoop() {
 			//dif them
 			printf("%f, %f, %f\n", rotQ.getX(), rotQ.getY(), rotQ.getZ());
 			sensor_msgs::JointState move;
+
+			//we don't need to change anything here, because there rotation is the same
 			move.name.push_back("arm_base");
-			move.position.push_back(rotQ.getZ());
+			move.position.push_back(rotQ.getZ()*1);
+
+			//listenToOculus.lookupTransform("/arm_shoulder", "/camera",  ros::Time(0), cameraArmSTransform);
+			move.name.push_back("arm_shoulder");
+			move.position.push_back(rotQ.getX()*-1);
+
+			move.name.push_back("arm_elbow");
+			move.position.push_back(rotQ.getX()*-1);
 			jointPub.publish(move);
 		} catch (tf::TransformException ex){
 			ROS_ERROR("%s",ex.what());
