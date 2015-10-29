@@ -72,11 +72,11 @@ void JointManager::logicLoop() {
 			sensor_msgs::JointState move;
 
 			//we don't need to change anything here, because there rotation is the same
-			move.name.push_back("arm_base");
+			move.name.push_back("neck_pan");
 			move.position.push_back(rotQ.getZ()*1);
 
 			//listenToOculus.lookupTransform("/arm_shoulder", "/camera",  ros::Time(0), cameraArmSTransform);
-			move.name.push_back("arm_shoulder");
+			move.name.push_back("neck_tilt");
 			move.position.push_back(rotQ.getX()*-1);
 
 			move.name.push_back("arm_elbow");
