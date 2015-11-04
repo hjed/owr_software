@@ -10,7 +10,8 @@
 #define JOINTS_IN_TOPIC "/joint_states"
 #define JOINTS_OUT_TOPIC "/joint_control"
 
-
+//we assume that our focal point is 1m away from the camera
+#define FOCAL_DISTANCE_FROM_CAMERA 1.0
 
 JointManager::JointManager(ros::NodeHandle nh) {
     jointSub = nh.subscribe(JOINTS_IN_TOPIC, 2,  &JointManager::jointCallback, this);
@@ -54,39 +55,56 @@ void JointManager::jointCallback(const sensor_msgs::JointState::ConstPtr& msg){
 
 
 void JointManager::logicLoop() {
-	tf::Vector3 lastOrig;
-	while(ros::ok()) {
-		tf::StampedTransform transform;
-		tf::StampedTransform cameraArmSTransform;
+    tf::Vector3 lastOrig;
+    while(ros::ok()) {
+        tf::StampedTransform transform;
+        tf::StampedTransform cameraArmSTransform;
 
-		try {
-			//we want to rotate around camera_link and then match that
-			listenToOculus.lookupTransform("/base_link", "/oculus",  ros::Time(0), transform);
-			tf::Vector3 orig =  transform.getOrigin();
-			tf::Quaternion rotQ =  transform.getRotation();
-			//printf("%f, %f, %f\n", orig.x(), orig.y(), orig.z());
-			//for oculus: z is down, y is forward back, x is left right
-			//rotation: x is up/down, y is rotation about the horizontal axis, z is about the vertical axis
-			//dif them
-			printf("%f, %f, %f\n", rotQ.getX(), rotQ.getY(), rotQ.getZ());
-			sensor_msgs::JointState move;
+        try {
+            //we want to rotate around camera_link and then match that
+            listenToOculus.lookupTransform("/oculus", "/camera",  ros::Time(0), transform);
+            tf::Vector3 orig =  transform.getOrigin();
+            tf::Quaternion rotQ =  transform.getRotation();
+            //printf("%f, %f, %f\n", orig.x(), orig.y(), orig.z());
+            //for oculus: z is down, y is forward back, x is left right
+            //rotation: x is up/down, y is rotation about the horizontal axis, z is about the vertical axis
+            //dif them
+            printf("%f, %f, %f\n", rotQ.getX(), rotQ.getY(), rotQ.getZ());
+            sensor_msgs::JointState move;
 
-			//we don't need to change anything here, because there rotation is the same
-			move.name.push_back("neck_pan");
-			move.position.push_back(rotQ.getZ()*1);
+            //we don't need to change anything here, because there rotation is the same
+//             adjustJoint(&move, "neck_pan", orig.z(), 0.0, rotQ.getZ(),0);
+//             adjustJoint(&move, "neck_tilt", orig.x(), 0.0, rotQ.getX()*-1,0);
+//             adjustJoint(&move, "arm_elbow", orig.x(), 0.0, rotQ.getX()*-1,0);
+            move.position.push_back(rotQ.getZ()*1);
+            
 
-			//listenToOculus.lookupTransform("/arm_shoulder", "/camera",  ros::Time(0), cameraArmSTransform);
-			move.name.push_back("neck_tilt");
-			move.position.push_back(rotQ.getX()*-1);
+//             listenToOculus.lookupTransform("/arm_shoulder", "/camera",  ros::Time(0), cameraArmSTransform);
+            move.name.push_back("neck_tilt");
+            move.position.push_back(rotQ.getX()*-1);
 
-			move.name.push_back("arm_elbow");
-			move.position.push_back(rotQ.getX()*-1);
-			jointPub.publish(move);
-		} catch (tf::TransformException ex){
-			ROS_ERROR("%s",ex.what());
-			ros::Duration(1.0).sleep();
-		}
-		//ros::spinonce();
-	}
+            move.name.push_back("arm_elbow");
+            move.position.push_back(rotQ.getX()*-1);
+            jointPub.publish(move);
+        } catch (tf::TransformException ex){
+            ROS_ERROR("%s",ex.what());
+            ros::Duration(1.0).sleep();
+        }
+        //ros::spinonce();
+    }
 }
+
+void JointManager::adjustJoint ( sensor_msgs::JointState  *msg, std::string jointName, float axisCordOculus, float axisCordCamera, float oculusAngle, float cameraAngle ) {
+    float distance1D = fabs(axisCordOculus - axisCordCamera);
+    /* we calculate the extirior angle of the triangle between the camera, the oculus view point, and  a point 1m away from the camera to find the correct angle
+     * we have two sides (distances) and one useful angle opposite side d
+     * By the sin rule we can calculate the angle sum of the triangle
+     * Then the extirior angle
+     */
+    float angleGama = asin(distance1D*sin(oculusAngle));
+    float angle = angleGama + 
+    msg->name.push_back(jointName);
+    msg->position.push_back(oculusAngle);
+}
+
 

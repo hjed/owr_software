@@ -50,6 +50,8 @@ class JointManager {
         std::map <std::string, JointPosition> jointMap;
         //listens for the oculus transform
         tf::TransformListener  listenToOculus;
+        //function to adjust an axis
+        void adjustJoint(sensor_msgs::JointState  *msg, std::string jointName, float axisCordOculus, float axisCordCamera, float oculusAngle, float cameraAngle);
 
 
 };
