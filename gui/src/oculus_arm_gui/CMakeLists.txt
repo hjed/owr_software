@@ -116,16 +116,29 @@ include_directories(
 link_directories(${catkin_LIBRARY_DIRS})
 
 #qt preprocessor for header files
-qt4_wrap_cpp(MOC_FILES  include/oculus_arm_gui/ArmGuiApp.hpp include/oculus_arm_gui/OculusDisplay.hpp)
+qt4_wrap_cpp(MOC_FILES   include/oculus_arm_gui/FocusArm.hpp)
 
-add_executable(arm_gui src/ArmGuiApp.cpp src/OculusDisplay.cpp src/JointManager.cpp ${MOC_FILES}) 
-add_dependencies(arm_gui ${catkin_EXPORTED_TARGETS})
-add_dependencies(arm_gui owr_messages_gencpp)
-target_link_libraries(arm_gui ${catkin_LIBRARIES} ${ros_ovr_sdk_LIBRARIES} ${QT_LIBRARIES} default_plugin)
+#add_executable(arm_gui src/ArmGuiApp.cpp src/OculusDisplay.cpp src/JointManager.cpp ${MOC_FILES}) 
+#add_dependencies(arm_gui ${catkin_EXPORTED_TARGETS})
+#add_dependencies(arm_gui owr_messages_gencpp)
+#target_link_libraries(arm_gui ${catkin_LIBRARIES} ${ros_ovr_sdk_LIBRARIES} ${QT_LIBRARIES} default_plugin)
 
 add_executable(arm_tf  src/JointManager.cpp src/RunJoints.cpp) 
 add_dependencies(arm_tf ${catkin_EXPORTED_TARGETS})
 target_link_libraries(arm_tf ${catkin_LIBRARIES} default_plugin)
+
+add_library(oculus_arm_gui
+  src/FocusArm.cpp
+    ${MOC_FILES}
+)
+
+target_link_libraries(oculus_arm_gui
+  ${catkin_LIBRARIES}
+  ${QT_LIBRARIES}
+  ${ros_ovr_sdk_LIBRARIES}
+  ${BOOST_LIBRARIES}
+)
+
 
 ## Declare a cpp library
 # add_library(oculus_arm_gui
@@ -178,7 +191,15 @@ target_link_libraries(arm_tf ${catkin_LIBRARIES} default_plugin)
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
-
+install(FILES
+  plugin_description.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+install(TARGETS oculus_arm_gui
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 #############
 ## Testing ##
 #############
