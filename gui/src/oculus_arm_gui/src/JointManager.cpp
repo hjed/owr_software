@@ -62,7 +62,7 @@ void JointManager::logicLoop() {
 
         try {
             //we want to rotate around camera_link and then match that
-            listenToOculus.lookupTransform("/oculus", "/camera",  ros::Time(0), transform);
+            listenToOculus.lookupTransform("/arm_base", "/oculus",  ros::Time(0), transform);
             tf::Vector3 orig =  transform.getOrigin();
             tf::Quaternion rotQ =  transform.getRotation();
             //printf("%f, %f, %f\n", orig.x(), orig.y(), orig.z());
@@ -76,15 +76,16 @@ void JointManager::logicLoop() {
 //             adjustJoint(&move, "neck_pan", orig.z(), 0.0, rotQ.getZ(),0);
 //             adjustJoint(&move, "neck_tilt", orig.x(), 0.0, rotQ.getX()*-1,0);
 //             adjustJoint(&move, "arm_elbow", orig.x(), 0.0, rotQ.getX()*-1,0);
+            move.name.push_back("neck_pan");
             move.position.push_back(rotQ.getZ()*1);
             
 
 //             listenToOculus.lookupTransform("/arm_shoulder", "/camera",  ros::Time(0), cameraArmSTransform);
             move.name.push_back("neck_tilt");
-            move.position.push_back(rotQ.getX()*-1);
+            move.position.push_back(rotQ.getY()*1);
 
             move.name.push_back("arm_elbow");
-            move.position.push_back(rotQ.getX()*-1);
+            move.position.push_back(rotQ.getY()*1);
             jointPub.publish(move);
         } catch (tf::TransformException ex){
             ROS_ERROR("%s",ex.what());
@@ -102,9 +103,9 @@ void JointManager::adjustJoint ( sensor_msgs::JointState  *msg, std::string join
      * Then the extirior angle
      */
     float angleGama = asin(distance1D*sin(oculusAngle));
-    float angle = angleGama + 
-    msg->name.push_back(jointName);
-    msg->position.push_back(oculusAngle);
+    //float angle = angleGama + 
+    //msg->name.push_back(jointName);
+    //msg->position.push_back(oculusAngle);
 }
 
 
