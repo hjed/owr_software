@@ -45,6 +45,7 @@ class JointManager {
     protected:
         ros::Subscriber jointSub;
         ros::Publisher jointPub;
+        ros::NodeHandle nh;
     private:
         //stores the position of all the joints
         std::map <std::string, JointPosition> jointMap;

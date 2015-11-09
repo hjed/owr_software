@@ -14,6 +14,7 @@
 #define FOCAL_DISTANCE_FROM_CAMERA 1.0
 
 JointManager::JointManager(ros::NodeHandle nh) {
+    this->nh = nh;
     jointSub = nh.subscribe(JOINTS_IN_TOPIC, 2,  &JointManager::jointCallback, this);
     jointPub = nh.advertise<sensor_msgs::JointState>(JOINTS_OUT_TOPIC, 2, true);
     // spin async
@@ -56,13 +57,24 @@ void JointManager::jointCallback(const sensor_msgs::JointState::ConstPtr& msg){
 
 void JointManager::logicLoop() {
     tf::Vector3 lastOrig;
+    std::vector<std::string> zAxisRotate;
+    zAxisRotate.push_back("neck_pan");
+    std::vector<std::string> yAxisRotate;
+    yAxisRotate.push_back("neck_tilt");
+    yAxisRotate.push_back("arm_elbow");
+    //the vertical axis about which the camera should rotate
+    std::string rotationAxis;
     while(ros::ok()) {
         tf::StampedTransform transform;
         tf::StampedTransform cameraArmSTransform;
-
+        
         try {
+            //load the arm parameters
+            nh.param<std::vector<std::string> >("zAxisRotate", zAxisRotate, zAxisRotate);
+            nh.param<std::vector<std::string> >("yAxisRotate", yAxisRotate, yAxisRotate);
+            nh.param<std::string>("verticalRotation", rotationAxis, "/arm_base");
             //we want to rotate around camera_link and then match that
-            listenToOculus.lookupTransform("/arm_base", "/oculus",  ros::Time(0), transform);
+            listenToOculus.lookupTransform(rotationAxis.c_str(), "/oculus",  ros::Time(0), transform);
             tf::Vector3 orig =  transform.getOrigin();
             tf::Quaternion rotQ =  transform.getRotation();
             //printf("%f, %f, %f\n", orig.x(), orig.y(), orig.z());
@@ -76,16 +88,17 @@ void JointManager::logicLoop() {
 //             adjustJoint(&move, "neck_pan", orig.z(), 0.0, rotQ.getZ(),0);
 //             adjustJoint(&move, "neck_tilt", orig.x(), 0.0, rotQ.getX()*-1,0);
 //             adjustJoint(&move, "arm_elbow", orig.x(), 0.0, rotQ.getX()*-1,0);
-            move.name.push_back("neck_pan");
-            move.position.push_back(rotQ.getZ()*1);
+            for(int i = 0; i < zAxisRotate.size(); i++) {
+                move.name.push_back(zAxisRotate[i].c_str());
+                move.position.push_back(rotQ.getZ()*1);
+            }
             
 
 //             listenToOculus.lookupTransform("/arm_shoulder", "/camera",  ros::Time(0), cameraArmSTransform);
-            move.name.push_back("neck_tilt");
-            move.position.push_back(rotQ.getY()*1);
-
-            move.name.push_back("arm_elbow");
-            move.position.push_back(rotQ.getY()*1);
+            for(int i = 0; i < yAxisRotate.size(); i++) {
+                move.name.push_back(yAxisRotate[i].c_str());
+                move.position.push_back(rotQ.getY()*1);
+            }
             jointPub.publish(move);
         } catch (tf::TransformException ex){
             ROS_ERROR("%s",ex.what());
